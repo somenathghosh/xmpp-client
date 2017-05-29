@@ -1,8 +1,9 @@
 const Client = require('node-xmpp-client');
 const ltx = Client.ltx;
+const ddg = require('ddg');
 
 const options = {
-  jid: 'samsyasam@ec2-54-190-12-232.us-west-2.compute.amazonaws.com',
+  jid: 'prad@127.0.0.1',
   password: 'a1b2c3d4'
 }
 
@@ -41,15 +42,52 @@ const sendPresence = () => {
   client.send(stanza)
 }
 
+const NS_CHAT_STATE = 'http://jabber.org/protocol/chatstates';
+const sendChatState = (to, state) => {
+  const stanza = new ltx.Element('message', { type: 'chat', to })
+  stanza.c(state, { xmlns: NS_CHAT_STATE })
+  console.log('Sending chat state: ' + stanza.toString())
+  client.send(stanza)
+}
+
+
 const handleMessage = (stanza) => {
+  console.log(stanza);
   const messageContent = stanza.getChildText('body')
   if (!messageContent) return /* Not a chat message */
   const from = stanza.attr('from')
-  const logEntry = 'Received message from ' + from + ' with content:\n' + messageContent;
+  const logEntry = 'Received message from ' + from + ' with content: ' + messageContent;
   console.log(logEntry);
-  const reply = new ltx.Element( 'message', { type: 'chat', to: from });
-  reply.c('body').t(messageContent);
-  client.send(reply);
+  // const reply = new ltx.Element( 'message', { type: 'chat', to: from });
+  // reply.c('body').t(messageContent);
+  // client.send(reply);
+  sendChatState(from, 'active');
+  sendChatState(from, 'composing');
+
+  ////
+  ddg.query(messageContent, (error, data) => {
+    let result = null
+    if (error) {
+      result = 'Unfortunately we could not answer your request'
+    } else {
+      if (!data.RelatedTopics[0]) {
+        result = 'Sorry, there were no results!'
+      } else {
+        const item = data.RelatedTopics[0]
+        result = item.FirstURL + '\n' + item.Text
+      }
+    }
+    const reply = new ltx.Element(
+      'message',
+      { type: 'chat', to: from }
+    );
+    reply.c('body').t(result)
+    .up()
+    .c('inactive', { xmlns: NS_CHAT_STATE });
+    console.log('Sending response: ' + reply);
+    client.send(reply);
+    // sendChatState(from, 'gone');
+  });
 }
 
 const handlePresence = (stanza) => {

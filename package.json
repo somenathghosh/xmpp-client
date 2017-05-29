@@ -25,6 +25,7 @@
     }
   ],
   "dependencies": {
+    "ddg": "0.0.3",
     "node-xmpp-client": "^3.2.0",
     "qbox": "0.1.x"
   },

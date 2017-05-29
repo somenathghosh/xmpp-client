@@ -1,0 +1,19 @@
+{
+  "name": "browser-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http": "0.0.0",
+    "primus": "^7.0.2",
+    "primus-emitter": "^3.1.1",
+    "url": "^0.11.0",
+    "ws": "^3.0.0",
+    "xmpp-ftw": "^2.0.0"
+  }
+}
